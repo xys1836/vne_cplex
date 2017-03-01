@@ -1,6 +1,6 @@
 import networkx as nx
 import random
-
+from itertools import islice
 class NetworkBase(nx.Graph):
     SUBSTRATE = 0
     VIRTUAL = 1
@@ -34,6 +34,21 @@ class NetworkBase(nx.Graph):
         for n in self.nodes():
             self.node[n][propertyName] = random.randint(lb, ub)
 
+    def getAllPath(self, srcNode, dstNode):
+        if nx.has_path(self, srcNode,dstNode):
+            return nx.all_simple_paths(self, srcNode,dstNode)
+        else:
+            return None
+
+    def getShortestPath(self, srcNode, dstNode):
+        return nx.shortest_path(self, srcNode, dstNode)
+
+    def getKShortestPaths(self, srcNode, dstNode, k):
+        if nx.has_path(self, srcNode,dstNode):
+            return list(islice(nx.shortest_simple_paths(self, srcNode, dstNode), k))
+        else:
+            return None
+
 class SubstrateNetwork(NetworkBase):
 
     def __init__(self, nbNodes=None, prb=None):
@@ -42,6 +57,10 @@ class SubstrateNetwork(NetworkBase):
 
     def setBandwidthCapacity(self, lb, ub):
         self._setEdgesProperty(lb, ub, "capacity")
+
+    def setBandwidthCost(self, cost):
+        self._setEdgesProperty(cost, cost,'cost')
+
     def setCpuCapacity(self, lb, ub):
         self._setNodesProperty(lb, ub, "capacity")
 

@@ -15,20 +15,20 @@ class SubstrateNetworkData(object):
 substrateNetworkData = SubstrateNetworkData()
 substrateNetworkData.nbNodesOfSubstrateNetwork = 100
 substrateNetworkData.ctnProbability = 0.5
-substrateNetworkData.lbOfBandwidthCapacity = 50
+substrateNetworkData.lbOfBandwidthCapacity = 100
 substrateNetworkData.ubOfBandwidthCapacity = 100
-substrateNetworkData.lbOfCpuCapacity = 50
+substrateNetworkData.lbOfCpuCapacity = 100
 substrateNetworkData.ubOfCpuCapacity = 100
 
-sn = SubstrateNetwork(substrateNetworkData.nbNodesOfSubstrateNetwork, substrateNetworkData.ctnProbability)
-sn.setCpuCapacity(substrateNetworkData.lbOfCpuCapacity, substrateNetworkData.ubOfCpuCapacity)
-sn.setBandwidthCapacity(substrateNetworkData.lbOfBandwidthCapacity, substrateNetworkData.ubOfBandwidthCapacity)
+sn = SubstrateNetwork( substrateNetworkData.nbNodesOfSubstrateNetwork, substrateNetworkData.ctnProbability)
 
-
-
+sn.setCpuCapacity( substrateNetworkData.lbOfCpuCapacity, substrateNetworkData.ubOfCpuCapacity )
+sn.setBandwidthCapacity( substrateNetworkData.lbOfBandwidthCapacity, substrateNetworkData.ubOfBandwidthCapacity )
+sn.setBandwidthCost(20)
 
 print sn.nodes()
 print sn.edges()
-for n in sn.nodes():
-    print sn.node[n]['capacity']
+for e in sn.edges():
+    print sn.edge[e[0]][e[1]]['cost']
+
 
