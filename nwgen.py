@@ -64,9 +64,8 @@ class SubstrateNetwork(NetworkBase):
     def setCpuCapacity(self, lb, ub):
         self._setNodesProperty(lb, ub, "capacity")
 
-
 class VirtualNetwork(NetworkBase):
-
+    #virtual Network Class
     def __init__(self, nbNodes=None, prb=None):
         NetworkBase.__init__(self, nbNodes, prb)
         self.setNetworkType(NetworkBase.VIRTUAL)
