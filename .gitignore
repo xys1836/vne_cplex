@@ -1,8 +1,5 @@
 .idea/
 *.pyc
-<<<<<<< HEAD
 example/*
-=======
 data/
 examples/
->>>>>>> 5b28f8aa4dd49d38975a548b96b36d76a7faad9b
