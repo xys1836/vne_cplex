@@ -17,7 +17,7 @@ class SubstrateNetworkData(object):
         pass
 
 substrateNetworkData = SubstrateNetworkData()
-substrateNetworkData.nbNodesOfSubstrateNetwork = 100
+substrateNetworkData.nbNodesOfSubstrateNetwork = 20
 substrateNetworkData.ctnProbability = 0.5
 substrateNetworkData.lbOfBandwidthCapacity = 100
 substrateNetworkData.ubOfBandwidthCapacity = 100
@@ -30,6 +30,26 @@ sn.setCpuCapacity( substrateNetworkData.lbOfCpuCapacity, substrateNetworkData.ub
 sn.setBandwidthCapacity( substrateNetworkData.lbOfBandwidthCapacity, substrateNetworkData.ubOfBandwidthCapacity )
 sn.setBandwidthCost(20)
 
+vn = VirtualNetwork(5, 0.5)
+vn.setBandwidthRequirement(1, 50)
+vn.setCpuRequirement(1, 50)
+print vn.number_of_nodes()
+
+
+
+def generateNodeDecisionVariable(vn, sn):
+    dv = []
+    for i in range(0, vn.number_of_nodes()):
+        for j in range(0, sn.number_of_nodes()):
+            dv.append('Xv' + str(i) + 's' + str(j))
+    return dv
+def generateLinkDecisionVariable(vn, sn):
+    dv = []
+    
+print generateNodeDecisionVariable(vn, sn)
+
 prob = cplex.Cplex()
 prob.objective.set_sense(prob.objective.sense.minimize)
+
+
 

@@ -16,7 +16,7 @@ class NetworkBase(nx.Graph):
             self.add_nodes_from(nx.erdos_renyi_graph(nbNodes, prb).nodes())
             self.add_edges_from(nx.erdos_renyi_graph(nbNodes, prb).edges())
 
-    def setNetworkType(self, nType):
+    def _setNetworkType(self, nType):
         """
         Set network Type
         :param nType: network type. SUBSTRATE or VIRTUAL

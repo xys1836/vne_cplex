@@ -4,7 +4,7 @@ class SubstrateNetwork(NetworkBase):
 
     def __init__(self, nbNodes=None, prb=None):
         NetworkBase.__init__(self, nbNodes, prb)
-        self.setNetworkType(NetworkBase.SUBSTRATE)
+        self._setNetworkType(NetworkBase.SUBSTRATE)
 
     def setBandwidthCapacity(self, lb, ub):
         """
@@ -27,11 +27,12 @@ class VirtualNetwork(NetworkBase):
     #virtual Network Class
     def __init__(self, nbNodes=None, prb=None):
         NetworkBase.__init__(self, nbNodes, prb)
-        self.setNetworkType(NetworkBase.VIRTUAL)
+        self._setNetworkType(NetworkBase.VIRTUAL)
 
     def setBandwidthRequirement(self, lb, ub):
         self._setEdgesProperty(lb, ub, "requirement")
-    def setCpuRequirement(self, lb, ub, property):
+    def setCpuRequirement(self, lb, ub):
         self._setNodesProperty(lb, ub, "requirement")
+
 
 
