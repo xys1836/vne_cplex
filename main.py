@@ -43,9 +43,11 @@ def generateNodeDecisionVariable(vn, sn):
         for j in range(0, sn.number_of_nodes()):
             dv.append('Xv' + str(i) + 's' + str(j))
     return dv
+"""
 def generateLinkDecisionVariable(vn, sn):
     dv = []
-    
+"""
+
 print generateNodeDecisionVariable(vn, sn)
 
 prob = cplex.Cplex()
