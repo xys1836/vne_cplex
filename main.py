@@ -12,6 +12,10 @@ class SubstrateNetworkData(object):
         self.lbOfBandwidthCapacity = None
         self.ubOfBandwidthCapacity = None
 
+    def readData(self, d):
+        #todo: a method to read data from external file or data source.
+        pass
+
 substrateNetworkData = SubstrateNetworkData()
 substrateNetworkData.nbNodesOfSubstrateNetwork = 100
 substrateNetworkData.ctnProbability = 0.5
@@ -25,13 +29,6 @@ sn = SubstrateNetwork( substrateNetworkData.nbNodesOfSubstrateNetwork, substrate
 sn.setCpuCapacity( substrateNetworkData.lbOfCpuCapacity, substrateNetworkData.ubOfCpuCapacity )
 sn.setBandwidthCapacity( substrateNetworkData.lbOfBandwidthCapacity, substrateNetworkData.ubOfBandwidthCapacity )
 sn.setBandwidthCost(20)
-
-print sn.nodes()
-print sn.edges()
-for e in sn.edges():
-    print sn.edge[e[0]][e[1]]['cost']
-
-
 
 prob = cplex.Cplex()
 prob.objective.set_sense(prob.objective.sense.minimize)

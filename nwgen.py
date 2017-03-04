@@ -1,6 +1,8 @@
 import networkx as nx
 import random
 from itertools import islice
+
+
 class NetworkBase(nx.Graph):
     SUBSTRATE = 0
     VIRTUAL = 1
@@ -8,13 +10,18 @@ class NetworkBase(nx.Graph):
     def __init__(self, nbNodes = None, prb = None):
         nx.Graph.__init__(self)
         if nbNodes == None or prb == None:
-            #todo: handle other situation
+            #todo: handle other situations
             pass
         else:
             self.add_nodes_from(nx.erdos_renyi_graph(nbNodes, prb).nodes())
             self.add_edges_from(nx.erdos_renyi_graph(nbNodes, prb).edges())
 
     def setNetworkType(self, nType):
+        """
+        Set network Type
+        :param nType: network type. SUBSTRATE or VIRTUAL
+        :return: the network type set
+        """
         if nType == NetworkBase.SUBSTRATE or nType == NetworkBase.VIRTUAL:
             self.network_type = nType
         else:
@@ -56,6 +63,13 @@ class SubstrateNetwork(NetworkBase):
         self.setNetworkType(NetworkBase.SUBSTRATE)
 
     def setBandwidthCapacity(self, lb, ub):
+        """
+        Set bandwidth capacity of substrate network randomly.
+
+        :param lb: the low bound of bandwidth capacity
+        :param ub: the up bound of bandwidth capacity
+        :return: none
+        """
         self._setEdgesProperty(lb, ub, "capacity")
 
     def setBandwidthCost(self, cost):
@@ -63,6 +77,7 @@ class SubstrateNetwork(NetworkBase):
 
     def setCpuCapacity(self, lb, ub):
         self._setNodesProperty(lb, ub, "capacity")
+
 
 class VirtualNetwork(NetworkBase):
     #virtual Network Class
