@@ -32,3 +32,7 @@ for e in sn.edges():
     print sn.edge[e[0]][e[1]]['cost']
 
 
+
+prob = cplex.Cplex()
+prob.objective.set_sense(prob.objective.sense.minimize)
+
