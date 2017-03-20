@@ -55,3 +55,5 @@ class NetworkBase(nx.Graph):
             return list(islice(nx.shortest_simple_paths(self, srcNode, dstNode), k))
         else:
             return None
+    def getLinkPropertyBy(self, e,  property):
+        return self.edge[e[0]][e[1]][property]
