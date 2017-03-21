@@ -94,6 +94,8 @@ class SubstrateNetwork(NetworkBase):
         self.remove_edge(e[0], e[1])
     def removeLink(self, e):
         self.remove_edge(e[0], e[1])
+    def setLinkProperty(self, e, b, p):
+        self.edge[e[0]][e[1]]['capacity'] = b
 
 class VirtualNetwork(NetworkBase):
     #virtual Network Class

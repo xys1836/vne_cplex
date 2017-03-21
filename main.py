@@ -142,7 +142,7 @@ for edge in vn.edges():
 
     print('Node: %s, requirement: %s' % (src_node_vn, requirement_src_node_vn))
     print('Node: %s, requirement: %s' % (dst_node_vn, requirement_dst_node_vn))
-
+    print('bandwidth requirement: %s' % vn.getLinkPropertyBy(edge, 'requirement'))
     row = []
     row_rhs = []
     row_sense = []
@@ -203,7 +203,7 @@ for edge in vn.edges():
     prob.variables.add(obj=obj_cost, types=btype,names = decision_name_link)
     prob.linear_constraints.add(lin_expr = row, senses=''.join(row_sense),rhs=row_rhs, names=row_name)
     prob.solve()
-
+    """
     print()
     print(prob.solution.status[prob.solution.get_status()])
     print('Solution value = ', prob.solution.get_objective_value())
@@ -214,26 +214,55 @@ for edge in vn.edges():
     slack = prob.solution.get_linear_slacks()
     x = prob.solution.get_values()
 
+    """
 
     for j in decision_name_link:
         print('%10s: Value = %10f' %(j, prob.solution.get_values(j)) )
 
 
+
     prob.write('prob.lp')
 
+    """
+    y_ok = [ j for j in decision_name_link if 'meta' in j and prob.solution.get_values(j) == 1]
+    print(y_ok)
     for j in decision_name_link:
         if 'meta' in j and prob.solution.get_values(j) == 1:
-            print (j)
+            #print (j)
             if 'meta' == j.split('_')[1]:
                 mapping_dic[int(j.split('_')[2])] = int(j.split('_')[3])
-                print(j.split('_')[3])
+                #print(j.split('_')[3])
             elif 'meta' == j.split('_')[2]:
                 mapping_dic[int(j.split('_')[3])] = int(j.split('_')[1])
-                print(j.split('_')[1])
+                #print(j.split('_')[1])
 
-    print (mapping_dic)
+    """
 
+    mapped_dvars = [dvar for dvar in decision_name_link if prob.solution.get_values(dvar) == 1]
+    for dvar in mapped_dvars:
+        if 'meta' in dvar:
+            if 'meta' == dvar.split('_')[1]:
+                mapping_dic[int(dvar.split('_')[2])] = int(dvar.split('_')[3])
+            if 'meta' == dvar.split('_')[2]:
+                mapping_dic[int(dvar.split('_')[3])] = int(dvar.split('_')[1])
+        else:
+            link = (int(dvar.split('_')[1]), int(dvar.split('_')[2]))
+            cp = sn.getLinkPropertyBy(link, 'capacity')
+            print ('capaci')
+            print(cp)
+            sn.setLinkProperty(link, cp - vn.getLinkPropertyBy(edge, 'requirement'), 'capacity')
+            cp = sn.getLinkPropertyBy(link, 'capacity')
+            print ('capaci2')
+            print(cp)
+
+
+    print ('Mapping dictionary: \n%s' %mapping_dic)
+
+    print(mapped_dvars)
     #todo: find all links, change the node and link capacity of substrate network
+
+
+
 
 
 
