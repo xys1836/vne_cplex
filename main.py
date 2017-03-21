@@ -5,6 +5,7 @@ from vnemsg import VNE_Message
 
 vne_msg = VNE_Message()
 
+
 class SubstrateNetworkData(object):
     def __init__(self):
         self.nbNodesOfSubstrateNetwork = None
@@ -19,9 +20,10 @@ class SubstrateNetworkData(object):
     def readData(self, d):
         #todo: a method to read data from external file or data source.
         pass
+
 vne_msg.debug('vne msg debug')
 substrateNetworkData = SubstrateNetworkData()
-substrateNetworkData.nbNodesOfSubstrateNetwork = 10
+substrateNetworkData.nbNodesOfSubstrateNetwork = 11
 substrateNetworkData.ctnProbability = 0.5
 substrateNetworkData.lbOfBandwidthCapacity = 50
 substrateNetworkData.ubOfBandwidthCapacity = 100
@@ -29,33 +31,38 @@ substrateNetworkData.lbOfCpuCapacity = 50
 substrateNetworkData.ubOfCpuCapacity = 100
 
 sn = SubstrateNetwork()
-sn.createNetwork( substrateNetworkData.nbNodesOfSubstrateNetwork, substrateNetworkData.ctnProbability)
+flag = sn.createNetwork( substrateNetworkData.nbNodesOfSubstrateNetwork, substrateNetworkData.ctnProbability)
+while not flag:
+    flag = sn.createNetwork( substrateNetworkData.nbNodesOfSubstrateNetwork, substrateNetworkData.ctnProbability)
 sn.setCpuCapacity( substrateNetworkData.lbOfCpuCapacity, substrateNetworkData.ubOfCpuCapacity )
 sn.setBandwidthCapacity( substrateNetworkData.lbOfBandwidthCapacity, substrateNetworkData.ubOfBandwidthCapacity )
 sn.setBandwidthCost(1, 20)
 sn.setCpuCost(1, 20)
 
 vn = VirtualNetwork()
-vn.createNetwork(4, 0.5)
+flag = vn.createNetwork(4, 0.5)
+while not flag:
+    flag = vn.createNetwork(4, 0.5)
 vn.setBandwidthRequirement(1, 50)
 vn.setCpuRequirement(1, 50)
+
 #argumentGraph = sn.createArgumentGraph(vn)
 #print(argumentGraph.nodes())
+print('######## VN Info #############')
+print('vn info')
+for e in vn.edges():
+    print(e)
 
-
+print('######## VN Info END #############')
 def generateNodeDecisionVariable(vn, sn):
     return [
             ['Xv' + str(i) + 's' + str(j) for j in range(0, sn.number_of_nodes()) ]
             for i in range(0, vn.number_of_nodes())
            ]
 
-
-
 def generateLinkDecisionVariable(vn, sn):
     return ['Y_' + str(e[0]) + '_' + str(e[1]) for e in sn.edges()] \
            + ['Y_' + str(e[1]) + '_' + str(e[0]) for e in sn.edges()]
-
-
 
 def constructFlowConstraintsRow(G, node):
     neighbors = G.getNeighbors(node)
@@ -87,36 +94,23 @@ def constructSourceNodeConstraints(G, sourceNode):
 def constructDestinationNodeConstraints(G, destinationNode):
     return constructNodeConstraints(G, destinationNode, 1, 'dst_node')
 
+"""
 argumentGraph = sn.copy()
 argumentGraph = sn.addMetaNode(argumentGraph, vn, 'meta_0')
 argumentGraph = sn.addMetaNode(argumentGraph, vn, 'meta_1')
 
 argumentGraph = sn.addMetaNode(argumentGraph, vn, 'meta_2')
 argumentGraph = sn.addMetaNode(argumentGraph, vn, 'meta_3')
-for e in argumentGraph.edges():
-    print(e)
-for n in argumentGraph.nodes():
-    print(n)
+
 decision_name_link = generateLinkDecisionVariable(vn, argumentGraph)
 obj_cost = [ 1 for i in range(0, len(decision_name_link )) ]
 
 src_constraints = constructSourceNodeConstraints(argumentGraph, 'meta_0')
 dst_constraints = constructDestinationNodeConstraints(argumentGraph, 'meta_1')
 
-
-#btype = ['B' for i in range(0, len(decision_name_link))]
-#bytpe = ''.join(btype)
-
-
 """
-btype = 'B' * len(decision_name_link)
 
-row = []
-row_rhs = []
-row_sense = []
-row_name = []
 
-"""
 
 def appendFlowConstraint(row_tuple, row, rhs, sense, name):
     #todo: handle  all param validation
@@ -125,74 +119,67 @@ def appendFlowConstraint(row_tuple, row, rhs, sense, name):
     sense.append(row_tuple[2])
     name.append(row_tuple[3])
 
-"""
-appendFlowConstraint(src_constraints, row, row_rhs, row_sense, row_name)
-appendFlowConstraint(dst_constraints, row, row_rhs, row_sense, row_name)
-
-for node in sn.nodes():
-    row_tuple = constructNodeConstraints(argumentGraph, node, 0, 'node_'+ str(node))
-    appendFlowConstraint(row_tuple, row, row_rhs, row_sense, row_name)
-
-
-"""
 
 
 #todo preprocess, to delete all nodes and links which have not enough capacity for mapping
 #todo find out the new substrate nodes for the next mapping <- may be post process
 #todo construct a new objective and constraint matrix
 
-
-
-def findPath(G, sourceNode, dstNode):
-   pass
-
-def constructPathConstraints(G, sourceNode, dstNode):
-    pass
-
-
-
-
-
 mapping_dic = {}
 for node in vn.nodes():
     mapping_dic[node] = None
-print(mapping_dic)
 
-count = 0
 for edge in vn.edges():
-    """
-    if count == 2:
-        break
-    count += 1
-    """
+
+    print('########################################################################')
 
     src_node_vn = edge[0]
     dst_node_vn = edge[1]
+    requirement_src_node_vn = vn.node[src_node_vn]['requirement']
+    requirement_dst_node_vn = vn.node[dst_node_vn]['requirement']
     src_node_sn = None
     dst_node_sn = None
 
-
+    print('Node: %s, requirement: %s' % (src_node_vn, requirement_src_node_vn))
+    print('Node: %s, requirement: %s' % (dst_node_vn, requirement_dst_node_vn))
 
     row = []
     row_rhs = []
     row_sense = []
     row_name = []
 
-    #todo: delete nodes and links that have not sufficient resources
-
     argumentGraph = sn.copy()
-
+    sn_tmp = sn.copy()
 
     if mapping_dic[src_node_vn] == None:
-        argumentGraph.addMetaNode(argumentGraph, vn, 'meta_' + str(src_node_vn))
+        argumentGraph =sn.addMetaNode(argumentGraph, vn, 'meta_' + str(src_node_vn))
         src_node_sn = 'meta_' + str(src_node_vn)
+        #remove the link which the other node has not enough capacity in argument
+        for n in argumentGraph.getNeighbors(src_node_sn):
+            if argumentGraph.getNodePropertyBy(n, 'capacity') < vn.getNodePropertyBy(src_node_vn, 'requirement'):
+                print('SRC: not enough cpu capacity %s' %n)
+                print('remove edge %s - %s ' %(src_node_sn, n))
+                argumentGraph.removeEdge((src_node_sn, n))
     else:
         src_node_sn = mapping_dic[src_node_vn]
     if mapping_dic[dst_node_vn] == None:
-        argumentGraph.addMetaNode(argumentGraph, vn, 'meta_' + str(dst_node_vn))
+        argumentGraph = sn.addMetaNode(argumentGraph, vn, 'meta_' + str(dst_node_vn))
+        #remove the links which the other node has not enough capacity in argument nentwork
         dst_node_sn = 'meta_' + str(dst_node_vn)
+        for n in argumentGraph.getNeighbors(dst_node_sn):
+            if argumentGraph.getNodePropertyBy(n, 'capacity') < vn.getNodePropertyBy(dst_node_vn, 'requirement'):
+                print('DST: not enough cpu capacity')
+                print('remove edge %s - %s ' %(dst_node_sn, n))
+                argumentGraph.removeEdge((dst_node_sn, n))
+
     else:
         dst_node_sn = mapping_dic[dst_node_vn]
+
+    #remove the links that have not enough capacity in argument network
+    for e in argumentGraph.edges():
+        if argumentGraph.getLinkPropertyBy(e, 'capacity') < vn.getLinkPropertyBy(edge, 'requirement'):
+            print('Remove edge in argument network %s - %s' %(e[0], e[1]))
+            argumentGraph.removeEdge(e)
 
     src_constraints = constructSourceNodeConstraints(argumentGraph, src_node_sn)
     dst_constraints = constructDestinationNodeConstraints(argumentGraph, dst_node_sn)
@@ -221,7 +208,6 @@ for edge in vn.edges():
     print(prob.solution.status[prob.solution.get_status()])
     print('Solution value = ', prob.solution.get_objective_value())
 
-    """
     numcols = prob.variables.get_num()
     numrows = prob.linear_constraints.get_num()
 
@@ -232,7 +218,6 @@ for edge in vn.edges():
     for j in decision_name_link:
         print('%10s: Value = %10f' %(j, prob.solution.get_values(j)) )
 
-    """
 
     prob.write('prob.lp')
 
@@ -249,6 +234,8 @@ for edge in vn.edges():
     print (mapping_dic)
 
     #todo: find all links, change the node and link capacity of substrate network
+
+
 
 
 

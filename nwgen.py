@@ -73,16 +73,22 @@ class SubstrateNetwork(NetworkBase):
         num_nodes_area = (num_nodes_sn + num_nodes_sn % num_nodes_vn)/num_nodes_vn #number of nodes in one area
 
         d = node_num * num_nodes_area
+
         if d + num_nodes_area <= num_nodes_sn:
             for i in range(d, d + num_nodes_area ):
+                print('add a new edge %s - %s' %(i, metaNode))
                 argument_graph.add_edge(i, metaNode, {'capacity': float('inf')})
         else:
-            for i in range(d, num_nodes_sn):
+            for i in range(d, num_nodes_sn ):
+                print('add a new edge %s - %s' %(i, metaNode))
                 argument_graph.add_edge(i, metaNode, {'capacity': float('inf')})
         return argument_graph
 
     def getNeighbors(self, n):
         return self.neighbors(n)
+
+    def removeNode(self, n):
+        self.remove_node(n)
 
     def removeEdge(self, e):
         self.remove_edge(e[0], e[1])

@@ -17,6 +17,12 @@ class NetworkBase(nx.Graph):
         else:
             self.add_nodes_from(nx.erdos_renyi_graph(nbNodes, prb).nodes())
             self.add_edges_from(nx.erdos_renyi_graph(nbNodes, prb).edges())
+        if not nx.is_connected(self):
+            print('network is not connected')
+            return False
+        else:
+            print('network is connected')
+            return True
     def _setNetworkType(self, nType):
         """
         Set network Type
@@ -58,3 +64,5 @@ class NetworkBase(nx.Graph):
             return None
     def getLinkPropertyBy(self, e,  property):
         return self.edge[e[0]][e[1]][property]
+    def getNodePropertyBy(self, n, property):
+        return self.node[n][property]
