@@ -178,6 +178,7 @@ for edge in vn.edges():
     row_sense = []
     row_name = []
 
+    #todo: delete nodes and links that have not sufficient resources
 
     argumentGraph = sn.copy()
 
@@ -247,7 +248,7 @@ for edge in vn.edges():
 
     print (mapping_dic)
 
-
+    #todo: find all links, change the node and link capacity of substrate network
 
 
 
