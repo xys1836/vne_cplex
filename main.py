@@ -174,7 +174,7 @@ for edge in vn.edges():
 
     else:
         dst_node_sn = mapping_dic[dst_node_vn]
-
+    #todo: remove? the nodes that have not enough capacity in argument network
     #remove the links that have not enough capacity in argument network
     for e in argumentGraph.edges():
         if argumentGraph.getLinkPropertyBy(e, 'capacity') < vn.getLinkPropertyBy(edge, 'requirement'):
@@ -259,8 +259,7 @@ for edge in vn.edges():
     print ('Mapping dictionary: \n%s' %mapping_dic)
 
     print(mapped_dvars)
-    #todo: find all links, change the node and link capacity of substrate network
-
+    #todo: reduce the nodes' capacity after mapping
 
 
 
