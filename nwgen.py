@@ -2,9 +2,10 @@ from networkbase import NetworkBase
 
 class SubstrateNetwork(NetworkBase):
 
-    def __init__(self, nbNodes=None, prb=None):
-        NetworkBase.__init__(self, nbNodes, prb)
+    def __init__(self):
+        NetworkBase.__init__(self)
         self._setNetworkType(NetworkBase.SUBSTRATE)
+
 
     def setBandwidthCapacity(self, lb, ub):
         """
@@ -90,8 +91,8 @@ class SubstrateNetwork(NetworkBase):
 
 class VirtualNetwork(NetworkBase):
     #virtual Network Class
-    def __init__(self, nbNodes=None, prb=None):
-        NetworkBase.__init__(self, nbNodes, prb)
+    def __init__(self):
+        NetworkBase.__init__(self)
         self._setNetworkType(NetworkBase.VIRTUAL)
 
     def setBandwidthRequirement(self, lb, ub):

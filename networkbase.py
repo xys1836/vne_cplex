@@ -7,15 +7,16 @@ class NetworkBase(nx.Graph):
     SUBSTRATE = 0
     VIRTUAL = 1
 
-    def __init__(self, nbNodes = None, prb = None):
+    def __init__(self):
         nx.Graph.__init__(self)
+
+    def createNetwork(self, nbNodes = None, prb = None):
         if nbNodes == None or prb == None:
             #todo: handle other situations
             pass
         else:
             self.add_nodes_from(nx.erdos_renyi_graph(nbNodes, prb).nodes())
             self.add_edges_from(nx.erdos_renyi_graph(nbNodes, prb).edges())
-
     def _setNetworkType(self, nType):
         """
         Set network Type
