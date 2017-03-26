@@ -5,7 +5,6 @@ from vnemsg import VNE_Message
 
 vne_msg = VNE_Message()
 
-
 class SubstrateNetworkData(object):
     def __init__(self):
         self.nbNodesOfSubstrateNetwork = None
@@ -23,31 +22,33 @@ class SubstrateNetworkData(object):
 
 vne_msg.debug('vne msg debug')
 substrateNetworkData = SubstrateNetworkData()
-substrateNetworkData.nbNodesOfSubstrateNetwork = 11
+substrateNetworkData.nbNodesOfSubstrateNetwork = 30
 substrateNetworkData.ctnProbability = 0.5
 substrateNetworkData.lbOfBandwidthCapacity = 50
 substrateNetworkData.ubOfBandwidthCapacity = 100
 substrateNetworkData.lbOfCpuCapacity = 50
 substrateNetworkData.ubOfCpuCapacity = 100
 
+isConnected = False
+
 sn = SubstrateNetwork()
-flag = sn.createNetwork( substrateNetworkData.nbNodesOfSubstrateNetwork, substrateNetworkData.ctnProbability)
-while not flag:
-    flag = sn.createNetwork( substrateNetworkData.nbNodesOfSubstrateNetwork, substrateNetworkData.ctnProbability)
+isConnected = sn.createNetwork( substrateNetworkData.nbNodesOfSubstrateNetwork, substrateNetworkData.ctnProbability)
+while not isConnected:
+    isConnected = sn.createNetwork( substrateNetworkData.nbNodesOfSubstrateNetwork, substrateNetworkData.ctnProbability)
 sn.setCpuCapacity( substrateNetworkData.lbOfCpuCapacity, substrateNetworkData.ubOfCpuCapacity )
 sn.setBandwidthCapacity( substrateNetworkData.lbOfBandwidthCapacity, substrateNetworkData.ubOfBandwidthCapacity )
 sn.setBandwidthCost(1, 20)
 sn.setCpuCost(1, 20)
 
 vn = VirtualNetwork()
-flag = vn.createNetwork(4, 0.5)
-while not flag:
-    flag = vn.createNetwork(4, 0.5)
+isConnected = vn.createNetwork(4, 0.5)
+while not isConnected:
+    isConnected = vn.createNetwork(4, 0.5)
 vn.setBandwidthRequirement(1, 50)
 vn.setCpuRequirement(1, 50)
 
-#argumentGraph = sn.createArgumentGraph(vn)
-#print(argumentGraph.nodes())
+
+
 print('######## VN Info #############')
 print('vn info')
 for e in vn.edges():
@@ -94,24 +95,6 @@ def constructSourceNodeConstraints(G, sourceNode):
 def constructDestinationNodeConstraints(G, destinationNode):
     return constructNodeConstraints(G, destinationNode, 1, 'dst_node')
 
-"""
-argumentGraph = sn.copy()
-argumentGraph = sn.addMetaNode(argumentGraph, vn, 'meta_0')
-argumentGraph = sn.addMetaNode(argumentGraph, vn, 'meta_1')
-
-argumentGraph = sn.addMetaNode(argumentGraph, vn, 'meta_2')
-argumentGraph = sn.addMetaNode(argumentGraph, vn, 'meta_3')
-
-decision_name_link = generateLinkDecisionVariable(vn, argumentGraph)
-obj_cost = [ 1 for i in range(0, len(decision_name_link )) ]
-
-src_constraints = constructSourceNodeConstraints(argumentGraph, 'meta_0')
-dst_constraints = constructDestinationNodeConstraints(argumentGraph, 'meta_1')
-
-"""
-
-
-
 def appendFlowConstraint(row_tuple, row, rhs, sense, name):
     #todo: handle  all param validation
     row.append(row_tuple[0])
@@ -121,150 +104,330 @@ def appendFlowConstraint(row_tuple, row, rhs, sense, name):
 
 
 
-#todo preprocess, to delete all nodes and links which have not enough capacity for mapping
-#todo find out the new substrate nodes for the next mapping <- may be post process
-#todo construct a new objective and constraint matrix
 
-mapping_dic = {}
-for node in vn.nodes():
-    mapping_dic[node] = None
+# mapping_dic = {} #{vn_node : sn_node }
+# for node in vn.nodes():
+#     mapping_dic[node] = None
+#
+# for edge in vn.edges():
+#
+#     print('########################################################################')
+#
+#     src_node_vn = edge[0]
+#     dst_node_vn = edge[1]
+#     requirement_src_node_vn = vn.node[src_node_vn]['requirement']
+#     requirement_dst_node_vn = vn.node[dst_node_vn]['requirement']
+#     src_node_sn = None
+#     dst_node_sn = None
+#
+#     print('Node: %s, requirement: %s' % (src_node_vn, requirement_src_node_vn))
+#     print('Node: %s, requirement: %s' % (dst_node_vn, requirement_dst_node_vn))
+#     print('bandwidth requirement: %s' % vn.getLinkPropertyBy(edge, 'requirement'))
+#     row = []
+#     row_rhs = []
+#     row_sense = []
+#     row_name = []
+#
+#     argumentGraph = sn.copy()
+#     sn_tmp = sn.copy()
+#
+#     if mapping_dic[src_node_vn] == None:
+#         argumentGraph =sn.addMetaNode(argumentGraph, vn, 'meta_' + str(src_node_vn))
+#         src_node_sn = 'meta_' + str(src_node_vn)
+#         #remove the link which the other node has not enough capacity in argument
+#         for n in argumentGraph.getNeighbors(src_node_sn):
+#             if argumentGraph.getNodePropertyBy(n, 'capacity') < vn.getNodePropertyBy(src_node_vn, 'requirement'):
+#                 print('SRC: not enough cpu capacity %s' %n)
+#                 print('remove edge %s - %s ' %(src_node_sn, n))
+#                 argumentGraph.removeEdge((src_node_sn, n))
+#     else:
+#         src_node_sn = mapping_dic[src_node_vn]
+#     if mapping_dic[dst_node_vn] == None:
+#         argumentGraph = sn.addMetaNode(argumentGraph, vn, 'meta_' + str(dst_node_vn))
+#         #remove the links which the other node has not enough capacity in argument nentwork
+#         dst_node_sn = 'meta_' + str(dst_node_vn)
+#         for n in argumentGraph.getNeighbors(dst_node_sn):
+#             if argumentGraph.getNodePropertyBy(n, 'capacity') < vn.getNodePropertyBy(dst_node_vn, 'requirement'):
+#                 print('DST: not enough cpu capacity')
+#                 print('remove edge %s - %s ' %(dst_node_sn, n))
+#                 argumentGraph.removeEdge((dst_node_sn, n))
+#
+#     else:
+#         dst_node_sn = mapping_dic[dst_node_vn]
+#     #todo: remove? the nodes that have not enough capacity in argument network
+#     #remove the links that have not enough capacity in argument network
+#     for e in argumentGraph.edges():
+#         if argumentGraph.getLinkPropertyBy(e, 'capacity') < vn.getLinkPropertyBy(edge, 'requirement'):
+#             print('Remove edge in argument network %s - %s' %(e[0], e[1]))
+#             argumentGraph.removeEdge(e)
+#
+#
+#     # Construct constraints
+#     src_constraints = constructSourceNodeConstraints(argumentGraph, src_node_sn)
+#     dst_constraints = constructDestinationNodeConstraints(argumentGraph, dst_node_sn)
+#
+#     appendFlowConstraint(src_constraints, row, row_rhs, row_sense, row_name)
+#     appendFlowConstraint(dst_constraints, row, row_rhs, row_sense, row_name)
+#
+#     decision_name_link = generateLinkDecisionVariable(vn, argumentGraph)
+#     obj_cost = [ 1 for i in range(0, len(decision_name_link )) ]
+#
+#     btype = 'B' * len(decision_name_link)
+#
+#     for node in argumentGraph.nodes():
+#         if node != src_node_sn and node != dst_node_sn:
+#             #print(node)
+#             row_tuple = constructNodeConstraints(argumentGraph, node, 0, 'node_'+ str(node))
+#             appendFlowConstraint(row_tuple, row, row_rhs, row_sense, row_name)
+#
+#     prob = cplex.Cplex()
+#     prob.objective.set_sense(prob.objective.sense.minimize)
+#     prob.variables.add(obj=obj_cost, types=btype,names = decision_name_link)
+#     prob.linear_constraints.add(lin_expr = row, senses=''.join(row_sense),rhs=row_rhs, names=row_name)
+#     prob.solve()
+#     """
+#     print()
+#     print(prob.solution.status[prob.solution.get_status()])
+#     print('Solution value = ', prob.solution.get_objective_value())
+#
+#     numcols = prob.variables.get_num()
+#     numrows = prob.linear_constraints.get_num()
+#
+#     slack = prob.solution.get_linear_slacks()
+#     x = prob.solution.get_values()
+#
+#     """
+#
+#     for j in decision_name_link:
+#         print('%10s: Value = %10f' %(j, prob.solution.get_values(j)) )
+#
+#
+#
+#     prob.write('prob.lp')
+#
+#     #reduce the bandwidth of link which has been mapped
+#     mapped_dvars = [dvar for dvar in decision_name_link if prob.solution.get_values(dvar) == 1]
+#     for dvar in mapped_dvars:
+#         if 'meta' in dvar:
+#             node_sn = None
+#             node_vn = None
+#             # a new sn node is mapped, so change the capacity of node in sn
+#             if 'meta' == dvar.split('_')[1]:
+#                 node_sn = int(dvar.split('_')[3])
+#                 node_vn = int(dvar.split('_')[2])
+#                 mapping_dic[node_vn] = node_sn
+#                 print('map vn node %s to sn node %s' %(node_vn, node_sn))
+#
+#             if 'meta' == dvar.split('_')[2]:
+#                 node_sn = int(dvar.split('_')[1])
+#                 node_vn = int(dvar.split('_')[3])
+#                 mapping_dic[node_vn] = node_sn
+#                 print('map vn node %s to sn node %s' %(node_vn, node_sn))
+#             print(sn.getNodePropertyBy(node_sn, 'capacity'))
+#             c = sn.getNodePropertyBy(node_sn, 'capacity') - vn.getNodePropertyBy(node_vn, 'requirement')
+#             sn.setNodeProperty(node_sn, c, 'capacity')
+#             print('new')
+#             print(sn.getNodePropertyBy(node_sn, 'capacity'))
+#
+#         else:
+#             link = (int(dvar.split('_')[1]), int(dvar.split('_')[2]))
+#             #cp = sn.getLinkPropertyBy(link, 'capacity')
+#             sn.setLinkProperty(link,
+#                                sn.getLinkPropertyBy(link, 'capacity')
+#                                - vn.getLinkPropertyBy(edge, 'requirement'),
+#                                'capacity')
+#
+#
+#     print ('Mapping dictionary: \n%s' %mapping_dic)
+#
+#     print(mapped_dvars)
+#     #todo: reduce the nodes' capacity after mapping
 
-for edge in vn.edges():
-
-    print('########################################################################')
-
-    src_node_vn = edge[0]
-    dst_node_vn = edge[1]
-    requirement_src_node_vn = vn.node[src_node_vn]['requirement']
-    requirement_dst_node_vn = vn.node[dst_node_vn]['requirement']
-    src_node_sn = None
-    dst_node_sn = None
-
-    print('Node: %s, requirement: %s' % (src_node_vn, requirement_src_node_vn))
-    print('Node: %s, requirement: %s' % (dst_node_vn, requirement_dst_node_vn))
-    print('bandwidth requirement: %s' % vn.getLinkPropertyBy(edge, 'requirement'))
-    row = []
-    row_rhs = []
-    row_sense = []
-    row_name = []
-
-    argumentGraph = sn.copy()
-    sn_tmp = sn.copy()
-
-    if mapping_dic[src_node_vn] == None:
-        argumentGraph =sn.addMetaNode(argumentGraph, vn, 'meta_' + str(src_node_vn))
-        src_node_sn = 'meta_' + str(src_node_vn)
-        #remove the link which the other node has not enough capacity in argument
-        for n in argumentGraph.getNeighbors(src_node_sn):
-            if argumentGraph.getNodePropertyBy(n, 'capacity') < vn.getNodePropertyBy(src_node_vn, 'requirement'):
-                print('SRC: not enough cpu capacity %s' %n)
-                print('remove edge %s - %s ' %(src_node_sn, n))
-                argumentGraph.removeEdge((src_node_sn, n))
-    else:
-        src_node_sn = mapping_dic[src_node_vn]
-    if mapping_dic[dst_node_vn] == None:
-        argumentGraph = sn.addMetaNode(argumentGraph, vn, 'meta_' + str(dst_node_vn))
-        #remove the links which the other node has not enough capacity in argument nentwork
-        dst_node_sn = 'meta_' + str(dst_node_vn)
-        for n in argumentGraph.getNeighbors(dst_node_sn):
-            if argumentGraph.getNodePropertyBy(n, 'capacity') < vn.getNodePropertyBy(dst_node_vn, 'requirement'):
-                print('DST: not enough cpu capacity')
-                print('remove edge %s - %s ' %(dst_node_sn, n))
-                argumentGraph.removeEdge((dst_node_sn, n))
-
-    else:
-        dst_node_sn = mapping_dic[dst_node_vn]
-    #todo: remove? the nodes that have not enough capacity in argument network
-    #remove the links that have not enough capacity in argument network
-    for e in argumentGraph.edges():
-        if argumentGraph.getLinkPropertyBy(e, 'capacity') < vn.getLinkPropertyBy(edge, 'requirement'):
-            print('Remove edge in argument network %s - %s' %(e[0], e[1]))
-            argumentGraph.removeEdge(e)
-
-    src_constraints = constructSourceNodeConstraints(argumentGraph, src_node_sn)
-    dst_constraints = constructDestinationNodeConstraints(argumentGraph, dst_node_sn)
-
-    appendFlowConstraint(src_constraints, row, row_rhs, row_sense, row_name)
-    appendFlowConstraint(dst_constraints, row, row_rhs, row_sense, row_name)
-
-    decision_name_link = generateLinkDecisionVariable(vn, argumentGraph)
-    obj_cost = [ 1 for i in range(0, len(decision_name_link )) ]
-
-    btype = 'B' * len(decision_name_link)
-
-    for node in argumentGraph.nodes():
-        if node != src_node_sn and node != dst_node_sn:
-            #print(node)
-            row_tuple = constructNodeConstraints(argumentGraph, node, 0, 'node_'+ str(node))
-            appendFlowConstraint(row_tuple, row, row_rhs, row_sense, row_name)
-
-    prob = cplex.Cplex()
-    prob.objective.set_sense(prob.objective.sense.minimize)
-    prob.variables.add(obj=obj_cost, types=btype,names = decision_name_link)
-    prob.linear_constraints.add(lin_expr = row, senses=''.join(row_sense),rhs=row_rhs, names=row_name)
-    prob.solve()
-    """
-    print()
-    print(prob.solution.status[prob.solution.get_status()])
-    print('Solution value = ', prob.solution.get_objective_value())
-
-    numcols = prob.variables.get_num()
-    numrows = prob.linear_constraints.get_num()
-
-    slack = prob.solution.get_linear_slacks()
-    x = prob.solution.get_values()
-
-    """
-
-    for j in decision_name_link:
-        print('%10s: Value = %10f' %(j, prob.solution.get_values(j)) )
 
 
 
-    prob.write('prob.lp')
 
-    """
-    y_ok = [ j for j in decision_name_link if 'meta' in j and prob.solution.get_values(j) == 1]
-    print(y_ok)
-    for j in decision_name_link:
-        if 'meta' in j and prob.solution.get_values(j) == 1:
-            #print (j)
-            if 'meta' == j.split('_')[1]:
-                mapping_dic[int(j.split('_')[2])] = int(j.split('_')[3])
-                #print(j.split('_')[3])
-            elif 'meta' == j.split('_')[2]:
-                mapping_dic[int(j.split('_')[3])] = int(j.split('_')[1])
-                #print(j.split('_')[1])
 
-    """
 
-    mapped_dvars = [dvar for dvar in decision_name_link if prob.solution.get_values(dvar) == 1]
-    for dvar in mapped_dvars:
-        if 'meta' in dvar:
-            if 'meta' == dvar.split('_')[1]:
-                mapping_dic[int(dvar.split('_')[2])] = int(dvar.split('_')[3])
-            if 'meta' == dvar.split('_')[2]:
-                mapping_dic[int(dvar.split('_')[3])] = int(dvar.split('_')[1])
+def vne_mapping(vn, sn):
+    mapping_dic = {} #{vn_node : sn_node }
+    for node in vn.nodes():
+        mapping_dic[node] = None
+    count = 0
+    for edge in vn.edges():
+        count = count + 1
+        print( 'count: %s'  %count )
+        print('########################################################################')
+
+        src_node_vn = edge[0]
+        dst_node_vn = edge[1]
+        requirement_src_node_vn = vn.node[src_node_vn]['requirement']
+        requirement_dst_node_vn = vn.node[dst_node_vn]['requirement']
+        src_node_sn = None
+        dst_node_sn = None
+
+        print('Node: %s, requirement: %s' % (src_node_vn, requirement_src_node_vn))
+        print('Node: %s, requirement: %s' % (dst_node_vn, requirement_dst_node_vn))
+        print('bandwidth requirement: %s' % vn.getLinkPropertyBy(edge, 'requirement'))
+        row = []
+        row_rhs = []
+        row_sense = []
+        row_name = []
+
+        argumentGraph = sn.copy()
+        sn_tmp = sn.copy()
+
+        if mapping_dic[src_node_vn] == None:
+            argumentGraph =sn.addMetaNode(argumentGraph, vn, 'meta_' + str(src_node_vn))
+            src_node_sn = 'meta_' + str(src_node_vn)
+            #remove the link which the other node has not enough capacity in argument
+            for n in argumentGraph.getNeighbors(src_node_sn):
+                if argumentGraph.getNodePropertyBy(n, 'capacity') < vn.getNodePropertyBy(src_node_vn, 'requirement'):
+                    print('SRC: not enough cpu capacity %s' %n)
+                    print('remove edge %s - %s ' %(src_node_sn, n))
+                    argumentGraph.removeEdge((src_node_sn, n))
         else:
-            link = (int(dvar.split('_')[1]), int(dvar.split('_')[2]))
-            cp = sn.getLinkPropertyBy(link, 'capacity')
-            print ('capaci')
-            print(cp)
-            sn.setLinkProperty(link, cp - vn.getLinkPropertyBy(edge, 'requirement'), 'capacity')
-            cp = sn.getLinkPropertyBy(link, 'capacity')
-            print ('capaci2')
-            print(cp)
+            src_node_sn = mapping_dic[src_node_vn]
+        if mapping_dic[dst_node_vn] == None:
+            argumentGraph = sn.addMetaNode(argumentGraph, vn, 'meta_' + str(dst_node_vn))
+            #remove the links which the other node has not enough capacity in argument nentwork
+            dst_node_sn = 'meta_' + str(dst_node_vn)
+            for n in argumentGraph.getNeighbors(dst_node_sn):
+                if argumentGraph.getNodePropertyBy(n, 'capacity') < vn.getNodePropertyBy(dst_node_vn, 'requirement'):
+                    print('DST: not enough cpu capacity')
+                    print('remove edge %s - %s ' %(dst_node_sn, n))
+                    argumentGraph.removeEdge((dst_node_sn, n))
+
+        else:
+            dst_node_sn = mapping_dic[dst_node_vn]
+        #todo: remove? the nodes that have not enough capacity in argument network
+        #remove the links that have not enough capacity in argument network
+        for e in argumentGraph.edges():
+            if argumentGraph.getLinkPropertyBy(e, 'capacity') < vn.getLinkPropertyBy(edge, 'requirement'):
+                print('Remove edge in argument network %s - %s' %(e[0], e[1]))
+                print('not enough bandwidth capacity')
+                argumentGraph.removeEdge(e)
 
 
-    print ('Mapping dictionary: \n%s' %mapping_dic)
+        # Construct constraints
+        src_constraints = constructSourceNodeConstraints(argumentGraph, src_node_sn)
+        dst_constraints = constructDestinationNodeConstraints(argumentGraph, dst_node_sn)
 
-    print(mapped_dvars)
-    #todo: reduce the nodes' capacity after mapping
+        appendFlowConstraint(src_constraints, row, row_rhs, row_sense, row_name)
+        appendFlowConstraint(dst_constraints, row, row_rhs, row_sense, row_name)
+
+        decision_name_link = generateLinkDecisionVariable(vn, argumentGraph)
+        obj_cost = [ 1 for i in range(0, len(decision_name_link )) ]
+
+        btype = 'B' * len(decision_name_link)
+
+        for node in argumentGraph.nodes():
+            if node != src_node_sn and node != dst_node_sn:
+                #print(node)
+                row_tuple = constructNodeConstraints(argumentGraph, node, 0, 'node_'+ str(node))
+                appendFlowConstraint(row_tuple, row, row_rhs, row_sense, row_name)
+
+        prob = cplex.Cplex()
+        prob.objective.set_sense(prob.objective.sense.minimize)
+        prob.variables.add(obj=obj_cost, types=btype,names = decision_name_link)
+        prob.linear_constraints.add(lin_expr = row, senses=''.join(row_sense),rhs=row_rhs, names=row_name)
+        try:
+            prob.solve()
+        except:
+            print("not solution, exit")
+            exit(1)
+        """
+        print()
+        print(prob.solution.status[prob.solution.get_status()])
+        print('Solution value = ', prob.solution.get_objective_value())
+
+        numcols = prob.variables.get_num()
+        numrows = prob.linear_constraints.get_num()
+
+        slack = prob.solution.get_linear_slacks()
+        x = prob.solution.get_values()
+
+
+        for j in decision_name_link:
+            print('%10s: Value = %10f' %(j, prob.solution.get_values(j)) )
+
+
+        """
+
+        prob.write('prob.lp')
+
+        #reduce the bandwidth of link which has been mapped
+        mapped_dvars = [dvar for dvar in decision_name_link
+                        if prob.solution.get_values(dvar) == 1]
+        for dvar in mapped_dvars:
+            if 'meta' in dvar:
+                node_sn = None
+                node_vn = None
+                # a new sn node is mapped, so change the capacity of node in sn
+                if 'meta' == dvar.split('_')[1]:
+                    node_sn = int(dvar.split('_')[3])
+                    node_vn = int(dvar.split('_')[2])
+                    mapping_dic[node_vn] = node_sn
+                    print('map vn node %s to sn node %s' %(node_vn, node_sn))
+
+                if 'meta' == dvar.split('_')[2]:
+                    node_sn = int(dvar.split('_')[1])
+                    node_vn = int(dvar.split('_')[3])
+                    mapping_dic[node_vn] = node_sn
+                    print('map vn node %s to sn node %s' %(node_vn, node_sn))
+                c = sn.getNodePropertyBy(node_sn, 'capacity') \
+                    - vn.getNodePropertyBy(node_vn, 'requirement')
+                sn.setNodeProperty(node_sn, c, 'capacity')
+
+            else:
+                link = (int(dvar.split('_')[1]), int(dvar.split('_')[2]))
+                #cp = sn.getLinkPropertyBy(link, 'capacity')
+                sn.setLinkProperty(link,
+                                   sn.getLinkPropertyBy(link, 'capacity')
+                                   - vn.getLinkPropertyBy(edge, 'requirement'),
+                                   'capacity')
+
+
+        print ('Mapping dictionary: \n%s' %mapping_dic)
+        print(mapped_dvars)
+        #todo: reduce the nodes' capacity after mapping
+
+
+#vne_mapping(vn, sn)
+count = 0
+while True:
+    vn = VirtualNetwork()
+    isConnected = vn.createNetwork(8, 0.5)
+    while not isConnected:
+        isConnected = vn.createNetwork(8, 0.5)
+    vn.setBandwidthRequirement(1, 50)
+    vn.setCpuRequirement(1, 50)
+    try:
+        vne_mapping(vn, sn)
+        count = count + 1
+    except:
+        print("no solution exit.....")
+        print('total number of vn mapped: %s' %count)
+        exit(1)
 
 
 
-
-
+# vn = VirtualNetwork()
+# isConnected = vn.createNetwork(4, 0.5)
+# while not isConnected:
+#     isConnected = vn.createNetwork(4, 0.5)
+# vn.setBandwidthRequirement(1, 50)
+# vn.setCpuRequirement(1, 50)
+#
+# vne_mapping(vn, sn)
+# vn = VirtualNetwork()
+# isConnected = vn.createNetwork(4, 0.5)
+# while not isConnected:
+#     isConnected = vn.createNetwork(4, 0.5)
+# vn.setBandwidthRequirement(1, 50)
+# vn.setCpuRequirement(1, 50)
+#
+# vne_mapping(vn, sn)
 
 
 

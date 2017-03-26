@@ -15,16 +15,16 @@ class SubstrateNetwork(NetworkBase):
         :param ub: the up bound of bandwidth capacity
         :return: none
         """
-        self._setEdgesProperty(lb, ub, "capacity")
+        self._setEdgesPropertyRandomly(lb, ub, "capacity")
 
     def setBandwidthCost(self, lb, ub):
-        self._setEdgesProperty(lb, ub,'cost')
+        self._setEdgesPropertyRandomly(lb, ub, 'cost')
 
     def setCpuCapacity(self, lb, ub):
-        self._setNodesProperty(lb, ub, "capacity")
+        self._setNodesPropertyRandomly(lb, ub, "capacity")
 
     def setCpuCost(self, lb, ub):
-        self._setNodesProperty(lb, ub, 'cost')
+        self._setNodesPropertyRandomly(lb, ub, 'cost')
 
     def createArgumentGraph(self, vn):
         """Create an argument graph with meta nodes.
@@ -95,7 +95,23 @@ class SubstrateNetwork(NetworkBase):
     def removeLink(self, e):
         self.remove_edge(e[0], e[1])
     def setLinkProperty(self, e, b, p):
+        """
+        set Link property
+        :param e:  the edge or link
+        :param b:  the value of property (say bandwidth capacity)
+        :param p:  the name of property (say capacity or cost)
+        :return:
+        """
         self.edge[e[0]][e[1]]['capacity'] = b
+    def setNodeProperty(self, n, c, p):
+        """
+        set node property
+        :param n:  name of the node
+        :param c:  value of property
+        :param p:  name of property
+        :return:  None
+        """
+        self.node[n][p] = c
 
 class VirtualNetwork(NetworkBase):
     #virtual Network Class
@@ -104,9 +120,12 @@ class VirtualNetwork(NetworkBase):
         self._setNetworkType(NetworkBase.VIRTUAL)
 
     def setBandwidthRequirement(self, lb, ub):
-        self._setEdgesProperty(lb, ub, "requirement")
+        self._setEdgesPropertyRandomly(lb, ub, "requirement")
     def setCpuRequirement(self, lb, ub):
-        self._setNodesProperty(lb, ub, "requirement")
-
-
+        self._setNodesPropertyRandomly(lb, ub, "requirement")
+    def printOutInfo(self):
+        #todo: write a method to print out network info
+        pass
+    def setName(self, name):
+        self.name = name
 

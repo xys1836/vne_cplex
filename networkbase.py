@@ -35,14 +35,14 @@ class NetworkBase(nx.Graph):
             print "Network Type Error"
         return nType
 
-    def _setEdgesProperty(self, lb, ub, propertyName="capacity"):
+    def _setEdgesPropertyRandomly(self, lb, ub, propertyName="capacity"):
         if ub < lb:
             print "Error: Set edges property failed: up bound is lower than lower bound"
             exit(1)
         for e in self.edges():
             self.edge[e[0]][e[1]][propertyName] = random.randint(lb, ub)
 
-    def _setNodesProperty(self, lb, ub, propertyName="capacity"):
+    def _setNodesPropertyRandomly(self, lb, ub, propertyName="capacity"):
         if ub < lb:
             print "Error: Set node property failed: up bound is lower than lower bound"
         for n in self.nodes():
@@ -66,3 +66,4 @@ class NetworkBase(nx.Graph):
         return self.edge[e[0]][e[1]][property]
     def getNodePropertyBy(self, n, property):
         return self.node[n][property]
+
